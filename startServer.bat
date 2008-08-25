@@ -1,0 +1,1 @@
+\Aps\GAmes\DarkStar\sgs-0.9.6-r4193\sgs.bat target\classes SgsStratego.properties
