@@ -1,4 +1,4 @@
-package dnl.games.stratego.server;
+package dnl.games.stratego;
 
 import java.util.HashMap;
 import java.util.Map;
