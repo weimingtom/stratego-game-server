@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>dnl.games</groupId>
+	<artifactId>stratego-game-core</artifactId>
+	<packaging>jar</packaging>
+	<version>1.0</version>
+	<name>Stratego Game Core</name>
+
+	<dependencies>
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>2.3</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>1.4</version>
+		</dependency>		
+		<dependency>
+		    <groupId>junit</groupId>
+		    <artifactId>junit</artifactId>
+		    <version>4.4</version>
+		    <scope>test</scope>
+		</dependency>		
+	</dependencies>
+
+	<build>
+		<sourceDirectory>src/main/java</sourceDirectory>
+		<testSourceDirectory>src/main/test</testSourceDirectory>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.5</source>
+					<target>1.5</target>
+				</configuration>
+			</plugin>
+			<!--
+				<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+				<descriptorRefs>
+				<descriptorRef>jar-with-dependencies</descriptorRef>
+				</descriptorRefs>
+				<archive>
+				<manifest>
+				<mainClass>dnl.dtools.jcmndr.JCommanderMain</mainClass>
+				</manifest>
+				</archive>
+				</configuration>
+				</plugin> -->
+		</plugins>
+
+	</build>
+</project>

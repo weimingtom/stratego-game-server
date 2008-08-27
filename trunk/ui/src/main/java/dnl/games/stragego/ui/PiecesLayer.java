@@ -1,10 +1,10 @@
 package dnl.games.stragego.ui;
 
 import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.Image;
 
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 /**
@@ -13,15 +13,16 @@ import javax.swing.JPanel;
 class PiecesLayer extends JPanel {
 
 	Image image;
-
+	JLabel piece;
+	
 	PiecesLayer(ImageLoader imageLoader) {
+		super(null);
 		image = imageLoader.getShieldImage();
+		piece = new JLabel(new ImageIcon(image));
 		this.setOpaque(false);
-	}
-
-	public void paintComponent(Graphics g) {
-		Graphics2D g2 = (Graphics2D) g;
-		g2.drawImage(image, 0, 0, this);
+		this.add(piece);
+		piece.setBounds(0,0,100,100);
+		
 	}
 
 	/**
@@ -31,7 +32,6 @@ class PiecesLayer extends JPanel {
 	 */
 	public final Dimension getPreferredSize() {
 		Dimension d = new Dimension(image.getWidth(this), image.getHeight(this));
-		System.out.println("--"+d);
 		return d;
 	}
 

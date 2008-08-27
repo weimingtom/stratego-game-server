@@ -1,8 +1,16 @@
-package dnl.games.stratego.server;
+package dnl.games.stratego;
 
 import junit.framework.Assert;
 
 import org.junit.Test;
+
+import dnl.games.stratego.Board;
+import dnl.games.stratego.BoardMapReader;
+import dnl.games.stratego.Location;
+import dnl.games.stratego.MoveResult;
+import dnl.games.stratego.PlayerType;
+import dnl.games.stratego.StrategoPiece;
+import dnl.games.stratego.StrategoPieceType;
 
 public class BoardMapReaderTest {
 
