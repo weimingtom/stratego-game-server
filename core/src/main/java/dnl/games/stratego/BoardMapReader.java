@@ -11,6 +11,9 @@ public class BoardMapReader {
 
 	public static Board readSystemResource(String resourceName) throws IOException {
 		InputStream is = ClassLoader.getSystemResourceAsStream(resourceName);
+		if(is == null){
+			throw new IllegalStateException("Did not find a system resource named: "+resourceName);
+		}
 		StringWriter stringWriter = new StringWriter();
 		IOUtils.copy(is, stringWriter);
 		String s = stringWriter.getBuffer().toString();

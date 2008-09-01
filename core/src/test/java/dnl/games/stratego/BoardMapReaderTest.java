@@ -56,6 +56,11 @@ public class BoardMapReaderTest {
 		Assert.assertEquals(MoveResult.BLOWN, moveResult);
 	}
 
-	
+	@Test
+	public void testUnknownEnemy() throws Exception {
+		Board board = BoardMapReader.readSystemResource("test2.stratego.map");
+		StrategoPiece piece = board.getPieceAt(0, 0);
+		Assert.assertEquals(StrategoPieceType.UNKNOWN, piece.getType());
+	}
 	
 }

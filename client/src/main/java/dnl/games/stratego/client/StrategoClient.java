@@ -10,6 +10,8 @@ import com.sun.sgs.client.ClientChannelListener;
 import com.sun.sgs.client.simple.SimpleClient;
 import com.sun.sgs.client.simple.SimpleClientListener;
 
+import dnl.games.stragego.ui.BoardUI;
+
 public class StrategoClient implements SimpleClientListener {
 
     /** The version of the serialized form of this class. */
@@ -32,6 +34,8 @@ public class StrategoClient implements SimpleClientListener {
     
 	protected final SimpleClient simpleClient = new SimpleClient(this);
 	
+	private BoardUI boardUI = new BoardUI();
+	
     protected void login() {
         String host = System.getProperty(HOST_PROPERTY, DEFAULT_HOST);
         String port = System.getProperty(PORT_PROPERTY, DEFAULT_PORT);
@@ -45,6 +49,8 @@ public class StrategoClient implements SimpleClientListener {
             e.printStackTrace();
             disconnected(false, e.getMessage());
         }
+        
+        //boardUI,
     }
     
     /**

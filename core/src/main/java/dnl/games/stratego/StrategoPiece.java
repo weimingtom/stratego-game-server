@@ -1,5 +1,8 @@
 package dnl.games.stratego;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class StrategoPiece {
 	private StrategoPieceType type;
 	private PlayerType player;
@@ -14,6 +17,27 @@ public class StrategoPiece {
 		}
 		this.player = player;
 		this.type = type;
+	}
+
+	public static List<StrategoPiece> enumerateInitialPieces(PlayerType playerType){
+		List<StrategoPiece> result = new ArrayList<StrategoPiece>();
+		StrategoPieceType[] values = StrategoPieceType.values();
+		for (StrategoPieceType strategoPieceType : values) {
+			int quantity = strategoPieceType.getInitialQuantity();
+			for (int i = 0; i < quantity; i++) {
+				result.add(new StrategoPiece(playerType, strategoPieceType));
+			}
+		}
+		if (result.size() != 40) {
+			throw new IllegalStateException(
+					"This game is started using 40 pieces of every color and not "
+							+ result.size() + ".");
+		}
+		return result;
+	}
+	
+	public boolean isUnknown(){
+		return StrategoPieceType.UNKNOWN.equals(type);
 	}
 
 	public boolean isBomb(){
