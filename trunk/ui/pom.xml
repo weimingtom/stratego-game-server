@@ -8,6 +8,11 @@
 	<name>Stratego Game UI</name>
 	<dependencies>
 		<dependency>
+			<groupId>dnl.games</groupId>
+			<artifactId>stratego-game-core</artifactId>
+			<version>1.0</version>
+		</dependency>	
+		<dependency>
 			<groupId>commons-lang</groupId>
 			<artifactId>commons-lang</artifactId>
 			<version>2.3</version>

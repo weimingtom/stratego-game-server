@@ -14,17 +14,18 @@ import javax.swing.JPanel;
 class BoardLayer2 extends JPanel {
 
 	Image image;
-
+	Dimension imageOriginalSize;
+	
 	BoardLayer2(ImageLoader imageLoader) {
 		image = imageLoader.getBoardImage();
+		imageOriginalSize = new Dimension(image.getWidth(this), image.getHeight(this));
 	}
 
 	public void paintComponent(Graphics g) {
 		Graphics2D g2 = (Graphics2D) g;
-		g2.drawImage(image, 0, 0, this);
+		g2.drawImage(image, 0, 0, this.getWidth(), this.getHeight(), this);
 		double w = getWidth();
 		double h = getHeight();
-		
 		g2.setColor(Color.red.darker());
 		
 		for (int i = 0; i < 10; i++) {
@@ -44,13 +45,11 @@ class BoardLayer2 extends JPanel {
 	 * @return The preferred size of the board.
 	 */
 	public final Dimension getPreferredSize() {
-		Dimension d = new Dimension(image.getWidth(this), image.getHeight(this));
-		System.err.println(d);
-		return d;
+		return imageOriginalSize;
 	}
 
 	public final Dimension getMinimumSize() {
-		return getPreferredSize();
+		return imageOriginalSize;
 	}
 
 }

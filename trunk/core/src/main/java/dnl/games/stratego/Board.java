@@ -1,6 +1,8 @@
 package dnl.games.stratego;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -56,6 +58,12 @@ public class Board {
 		return piece;
 	}
 
+	public List<Location> possibleMoves(Location from){
+		List<Location> result = new ArrayList<Location>();
+		
+		return result;
+	}
+	
 	public MoveResult movePiece(Location from, Location to){
 		MoveResult moveResult = resolveMoveResult(from, to);
 		// execute move
@@ -80,7 +88,7 @@ public class Board {
 	private MoveResult resolveMoveResult(Location from, Location to){
 		StrategoPiece piece1 = getPieceAt(from);
 		logger.info("Attempting to move "+piece1+" from "+from+" to "+to);
-		if(piece1.isBomb() || piece1.isFlag()){
+		if(piece1.isBomb() || piece1.isFlag() || piece1.isUnknown()){
 			return MoveResult.CANNOT_MOVE;
 		}
 		// cannot move in diagonals
