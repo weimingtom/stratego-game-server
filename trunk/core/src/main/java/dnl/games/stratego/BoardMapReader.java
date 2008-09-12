@@ -1,5 +1,7 @@
 package dnl.games.stratego;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -14,6 +16,14 @@ public class BoardMapReader {
 		if(is == null){
 			throw new IllegalStateException("Did not find a system resource named: "+resourceName);
 		}
+		return readStream(is);
+	}
+
+	public static Board readFile(File f) throws IOException {
+		return readStream(new FileInputStream(f));
+	}
+	
+	public static Board readStream(InputStream is) throws IOException {
 		StringWriter stringWriter = new StringWriter();
 		IOUtils.copy(is, stringWriter);
 		String s = stringWriter.getBuffer().toString();

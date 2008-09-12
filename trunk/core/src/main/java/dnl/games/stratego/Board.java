@@ -47,11 +47,26 @@ public class Board {
 		return squares[row][column];
 	}
 
-	private void setPieceAt(Location location, StrategoPiece piece) {
+	public void setPieceAt(Location location, StrategoPiece piece) {
 		clearLocation(location);
 		squares[location.getRow()][location.getColumn()] = piece;
 	}
 
+	/**
+	 * If you're on the red side you see it all upside down.
+	 */
+	public void flip(){
+		StrategoPiece[][] flippedSquares = new StrategoPiece[10][10];
+		for (int i = 0; i < squares.length; i++) {
+			for (int j = 0; j < squares[i].length; j++) {
+				int newi = 9 - i;
+				int newj = 9 - j;
+				flippedSquares[newi][newj] = squares[i][j];
+			}
+		}
+		this.squares = flippedSquares;
+	}
+	
 	private StrategoPiece clearLocation(Location location) {
 		StrategoPiece piece = getPieceAt(location);
 		squares[location.getRow()][location.getColumn()] = null;
