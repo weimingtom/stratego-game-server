@@ -14,6 +14,7 @@ import java.util.Map.Entry;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
+import dnl.games.stratego.Board;
 import dnl.games.stratego.Location;
 import dnl.games.stratego.StrategoPiece;
 
@@ -53,6 +54,17 @@ public class PiecesGrid extends JPanel {
 		return squareSize.getHeight();
 	}
 
+	public Board getBoard(){
+		Board board = new Board();
+		Set<Entry<Location, StrategoPieceUI>> entrySet = gridPieces.entrySet();
+		for (Entry<Location, StrategoPieceUI> me : entrySet) {
+			Location location = me.getKey();
+			StrategoPiece strategoPiece = me.getValue().getStrategoPiece();
+			board.setPieceAt(location, strategoPiece);
+		}
+		return board;
+	}
+	
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		Graphics2D g2 = (Graphics2D) g;
@@ -89,9 +101,21 @@ public class PiecesGrid extends JPanel {
 		}
 	}
 	
+	public void restorePiece(Location location){
+		StrategoPieceUI pieceUI = gridPieces.get(location);
+		if(pieceUI != null){
+			addPieceUI(location, pieceUI);
+		}
+	}
+	
+	public StrategoPieceUI getPieceAt(Point p){
+		Location location = getMatchingLocation(p);
+		return gridPieces.get(location);
+	}
+	
 	protected Location getMatchingLocation(Point p){
-		int row = (int)(p.x/getSquareWidth());
-		int column = (int)(p.y/getSquareHeight());
+		int column = (int)(p.x/getSquareWidth());
+		int row = (int)(p.y/getSquareHeight());
 		return new Location(row, column);
 	}
 	
@@ -113,11 +137,16 @@ public class PiecesGrid extends JPanel {
 //		this.pieceSize = new Dimension(cellWidth, cellHeight);
 //	}
 
-	protected StrategoPieceUI addPiece(int row, int column, StrategoPiece piece){
-		StrategoPieceUI pieceUI = new StrategoPieceUI(piece);
-		pieceUI.setLocationOnBoard(row, column);
+	protected void addPieceUI(Location location, StrategoPieceUI pieceUI){
+		pieceUI.setLocationOnBoard(location.getRow(), location.getColumn());
 		gridPieces.put(pieceUI.getLocationOnBoard(), pieceUI);
 		this.add(pieceUI);
+		setGraphicLocation(pieceUI);
+	}
+
+	protected StrategoPieceUI addPiece(int row, int column, StrategoPiece piece){
+		StrategoPieceUI pieceUI = new StrategoPieceUI(piece);
+		addPieceUI(new Location(row, column), pieceUI);
 		return pieceUI;
 	}
 

@@ -3,101 +3,104 @@ package dnl.games.stratego.client;
 import java.net.PasswordAuthentication;
 import java.nio.ByteBuffer;
 import java.util.Properties;
-import java.util.Random;
+import java.util.logging.Logger;
 
 import com.sun.sgs.client.ClientChannel;
 import com.sun.sgs.client.ClientChannelListener;
 import com.sun.sgs.client.simple.SimpleClient;
 import com.sun.sgs.client.simple.SimpleClientListener;
 
-import dnl.games.stragego.ui.BoardUI;
-
 public class StrategoClient implements SimpleClientListener {
 
-    /** The version of the serialized form of this class. */
-    private static final long serialVersionUID = 1L;
+	private static final Logger logger = Logger.getLogger(StrategoClient.class.getSimpleName());
 
-    /** The name of the host property. */
-    public static final String HOST_PROPERTY = "stratego.host";
+	/** The version of the serialized form of this class. */
+	private static final long serialVersionUID = 1L;
 
-    /** The default hostname. */
-    public static final String DEFAULT_HOST = "localhost";
+	/** The name of the host property. */
+	public static final String HOST_PROPERTY = "stratego.host";
 
-    /** The name of the port property. */
-    public static final String PORT_PROPERTY = "stratego.port";
+	/** The default hostname. */
+	public static final String DEFAULT_HOST = "localhost";
 
-    /** The default port. */
-    public static final String DEFAULT_PORT = "1139";
+	/** The name of the port property. */
+	public static final String PORT_PROPERTY = "stratego.port";
 
-    /** The random number generator for login names. */
-    private final Random random = new Random();
-    
+	/** The default port. */
+	public static final String DEFAULT_PORT = "1139";
+
 	protected final SimpleClient simpleClient = new SimpleClient(this);
-	
-	private BoardUI boardUI = new BoardUI();
-	
-    protected void login() {
-        String host = System.getProperty(HOST_PROPERTY, DEFAULT_HOST);
-        String port = System.getProperty(PORT_PROPERTY, DEFAULT_PORT);
 
-        try {
-            Properties connectProps = new Properties();
-            connectProps.put("host", host);
-            connectProps.put("port", port);
-            simpleClient.login(connectProps);
-        } catch (Exception e) {
-            e.printStackTrace();
-            disconnected(false, e.getMessage());
-        }
-        
-        //boardUI,
-    }
-    
-    /**
-     * Displays the given string in this client's status bar.
-     *
-     * @param status the status message to set
-     */
-    protected void setStatus(String status) {
-//        appendOutput("Status Set: " + status);
-//        statusLabel.setText("Status: " + status);
-    }
-    
-    /**
-     * {@inheritDoc}
-     * <p>
-     * Disables input and updates the status message on disconnect.
-     */
-    public void disconnected(boolean graceful, String reason) {
-//        inputPanel.setEnabled(false);
-//        setStatus("Disconnected: " + reason);
-    }
+	private String playerName;
+	
+	private ClientStatusListener clientStatusListener;
+	
+	public void setClientStatusListener(ClientStatusListener clientStatusListener) {
+		this.clientStatusListener = clientStatusListener;
+	}
+
+	public void login(String host, String port, String playerName) {
+		this.playerName = playerName;
+		//String host = System.getProperty(HOST_PROPERTY, DEFAULT_HOST);
+		//String port = System.getProperty(PORT_PROPERTY, DEFAULT_PORT);
+
+		try {
+			Properties connectProps = new Properties();
+			connectProps.put("host", host);
+			connectProps.put("port", port);
+			logger.info("Attempting to login player: " + playerName);
+			simpleClient.login(connectProps);
+		} catch (Exception e) {
+			disconnected(false, e.getMessage());
+		}
+
+	}
+
+	/**
+	 * Displays the given string in this client's status bar.
+	 * 
+	 * @param status
+	 *            the status message to set
+	 */
+	protected void setStatus(ClientStatus status, String statusMessage) {
+		if(clientStatusListener == null)
+			return;
+		clientStatusListener.statusChanged(status, statusMessage);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Disables input and updates the status message on disconnect.
+	 */
+	public void disconnected(boolean graceful, String reason) {
+		 setStatus(ClientStatus.DISCONNECTED, "Disconnected: " + reason);
+	}
 
 	@Override
-    /**
-     * {@inheritDoc}
-     * <p>
-     * Returns dummy credentials where user is "guest-&lt;random&gt;"
-     * and the password is "guest."  Real-world clients are likely
-     * to pop up a login dialog to get these fields from the player.
-     */
-    public PasswordAuthentication getPasswordAuthentication() {
-        String player = "guest-" + random.nextInt(1000);
-        setStatus("Logging in as " + player);
-        String password = "guest";
-        return new PasswordAuthentication(player, password.toCharArray());
-    }
+	/*
+	 * {@inheritDoc} <p> Returns dummy credentials where user is
+	 * "guest-&lt;random&gt;" and the password is "guest." Real-world clients
+	 * are likely to pop up a login dialog to get these fields from the player.
+	 */
+	public PasswordAuthentication getPasswordAuthentication() {
+		setStatus(ClientStatus.LOGGING_IN, "Logging in as " + playerName);
+		String password = "guest";
+		return new PasswordAuthentication(playerName, password.toCharArray());
+	}
 
 	@Override
 	public void loggedIn() {
-		// TODO Auto-generated method stub
-		
+		String msg = "Login succeeded for player: "+playerName;
+		logger.info(msg);
+		setStatus(ClientStatus.LOGGED_IN, msg);
 	}
 
 	@Override
 	public void loginFailed(String arg0) {
-		// TODO Auto-generated method stub
-		
+		String msg = "Login failed for player: "+playerName;
+		logger.info(msg);
+		setStatus(ClientStatus.LOGIN_FAILED, msg);
 	}
 
 	@Override
@@ -109,29 +112,18 @@ public class StrategoClient implements SimpleClientListener {
 	@Override
 	public void receivedMessage(ByteBuffer arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void reconnected() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void reconnecting() {
 		// TODO Auto-generated method stub
-		
-	}
-	
-	public static void main(String[] args) {
-		StrategoClient strategoClient = new StrategoClient();
-		strategoClient.login();
-		try {
-			Thread.sleep(100000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+
 	}
 }

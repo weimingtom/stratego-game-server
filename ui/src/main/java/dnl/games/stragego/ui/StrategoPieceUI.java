@@ -11,7 +11,7 @@ public class StrategoPieceUI extends JLabel {
 	StrategoPiece strategoPiece;
 
 	public StrategoPieceUI(StrategoPiece strategoPiece) {
-		super(strategoPiece.getAbbreviatedName() + "");
+		super(strategoPiece.getType().getAbbreviatedName() + "");
 		this.strategoPiece = strategoPiece;
 	}
 
@@ -29,5 +29,10 @@ public class StrategoPieceUI extends JLabel {
 
 	public void setLocationOnBoard(int row, int column) {
 		this.location = new Location(row, column);
+	}
+	
+	@Override
+	public String toString() {
+		return getClass().getSimpleName()+"(piece="+strategoPiece+", location="+location+")";
 	}
 }
