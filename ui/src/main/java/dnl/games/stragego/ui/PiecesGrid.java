@@ -13,6 +13,7 @@ import java.util.Map.Entry;
 
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 
 import dnl.games.stratego.Board;
 import dnl.games.stratego.Location;
@@ -91,6 +92,8 @@ public class PiecesGrid extends JPanel {
 			StrategoPieceUI pieceUI = entry.getValue();
 			if(pieceUI.getStrategoPiece().getPlayer().isBlue()){
 				pieceUI.setBackground(Color.blue);
+				pieceUI.setForeground(Color.white);
+				pieceUI.setHorizontalTextPosition(SwingConstants.CENTER);
 			}
 			else {
 				pieceUI.setBackground(Color.red);

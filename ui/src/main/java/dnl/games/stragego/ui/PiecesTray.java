@@ -30,8 +30,7 @@ public class PiecesTray extends PiecesGrid {
 			int i = k / 4;
 			int j = k % 4;
 			k++;
-			StrategoPieceUI pieceUI = addPiece(i, j, strategoPiece);
-			addMouseHandling(pieceUI);
+			addPiece(i, j, strategoPiece);
 		}
 	}
 	
@@ -39,37 +38,4 @@ public class PiecesTray extends PiecesGrid {
 		return selectedPieceUI;
 	}
 
-	private void addMouseHandling(final StrategoPieceUI pieceUI){
-//		pieceUI.addMouseListener(new MouseAdapter(){
-//
-//			@Override
-//			public void mouseReleased(MouseEvent e) {
-//				setGraphicLocation(pieceUI);
-//			}
-//
-//			@Override
-//			public void mousePressed(MouseEvent e) {
-//				//super.mousePressed(e);
-//				//boardUI.add
-//			}
-//			
-//		});
-//		pieceUI.addMouseMotionListener(new MouseMotionListener(){
-//			@Override
-//			public void mouseDragged(MouseEvent e) {
-//				selectedPieceUI = pieceUI;
-//				Point p = SwingUtilities.convertPoint(pieceUI, e.getPoint(),PiecesTray.this);
-//				Dimension2D ps = getPieceSize();
-//				int x = p.x - (int)(ps.getWidth()/2);
-//				int y = p.y - (int)(ps.getHeight()/2);
-//				pieceUI.setBounds(x, y, (int)ps.getWidth(), (int)ps.getHeight());
-//			}
-//
-//			@Override
-//			public void mouseMoved(MouseEvent e) {
-//				
-//			}
-//			
-//		});
-	}
 }

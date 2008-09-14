@@ -19,7 +19,6 @@ class PiecesLayer extends PiecesGrid {
 		super(new Dimension(60, 60), 10, 10);
 		this.setOpaque(false);
 		image = imageLoader.getBoardImage();
-		//imageOriginalSize = new Dimension(image.getWidth(this), image.getHeight(this));
 	}
 	
 	public void paintComponent(Graphics g) {
@@ -36,38 +35,10 @@ class PiecesLayer extends PiecesGrid {
 				if (piece != null) {
 					//StrategoPieceUI pieceUI = 
 						addPiece(i, j, piece);
-					//addMouseHandling(pieceUI);
 				}
 			}
 		}
 		drawGrid();
 	}
 
-//	private void addMouseHandling(final StrategoPieceUI pieceUI) {
-//		pieceUI.addMouseMotionListener(new MouseMotionListener(){
-//
-//			@Override
-//			public void mouseDragged(MouseEvent e) {
-//				// make sure that the moving piece is painted on top of everyone.
-//				PiecesLayer.this.setComponentZOrder(pieceUI, 0);
-//				Point point = SwingUtilities.convertPoint(pieceUI, e.getPoint(),PiecesLayer.this);
-//				Location location = getMatchingLocation(point);
-//				if(gridPieces.get(location) == null){
-//					
-//				}
-//				//setGraphicLocation(pieceLabel, column, row);
-//			}
-//
-//			@Override
-//			public void mouseMoved(MouseEvent e) {
-//			}
-//		});
-//		pieceUI.addMouseListener(new MouseAdapter(){
-//			@Override
-//			public void mouseClicked(MouseEvent e) {
-//				System.out.println(pieceUI.getStrategoPiece()+" - "+pieceUI.getLocationOnBoard());
-//			}
-//		});
-//	}
-	
 }
