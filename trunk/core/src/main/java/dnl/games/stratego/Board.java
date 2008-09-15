@@ -48,6 +48,10 @@ public class Board {
 	}
 
 	public void setPieceAt(Location location, StrategoPiece piece) {
+		if(location.getColumn() >= 10 || location.getRow() >= 10){
+			throw new IllegalArgumentException("no such location: "+location);
+		}
+	
 		clearLocation(location);
 		squares[location.getRow()][location.getColumn()] = piece;
 	}

@@ -3,7 +3,7 @@ package dnl.games.stratego.client;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 
-public class SimpleCharsetCodec {
+public class CDC {
 
 	/** The message encoding. */
 	public static final String MESSAGE_CHARSET = "UTF-8";
