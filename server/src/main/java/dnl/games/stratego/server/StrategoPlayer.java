@@ -1,6 +1,5 @@
 package dnl.games.stratego.server;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -12,6 +11,8 @@ import com.sun.sgs.app.DataManager;
 import com.sun.sgs.app.ManagedReference;
 import com.sun.sgs.app.NameNotBoundException;
 
+import dnl.games.stratego.comm.Command;
+
 public class StrategoPlayer extends StrategoObject implements ClientSessionListener {
 
 	/** The version of the serialized form of this class. */
@@ -20,22 +21,25 @@ public class StrategoPlayer extends StrategoObject implements ClientSessionListe
 	/** The {@link Logger} for this class. */
 	private static final Logger logger = Logger.getLogger(StrategoPlayer.class.getName());
 
-	/** The message encoding. */
-	public static final String MESSAGE_CHARSET = "UTF-8";
-
 	/** The prefix for player bindings in the {@code DataManager}. */
 	protected static final String PLAYER_BIND_PREFIX = "Player.";
 
 	/** The {@code ClientSession} for this player, or null if logged out. */
 	private ManagedReference<ClientSession> currentSessionRef = null;
 
-	/** The {@link SwordWorldRoom} this player is in, or null if none. */
-	private ManagedReference<StrategoGame> currentRoomRef = null;
+	/** The {@link StrategoRoom} this player is in, or null if none. */
+	private ManagedReference<StrategoRoom> currentRoomRef = null;
 
 	public StrategoPlayer(String name) {
 		super(name, "A player");
 	}
 
+	public String getSimpleName(){
+		String s = getName();
+		int ind = s.indexOf('.');
+		return s.substring(ind+1);
+	}
+	
 	/**
 	 * Find or create the player object for the given session, and mark the
 	 * player as logged in on that session.
@@ -84,12 +88,29 @@ public class StrategoPlayer extends StrategoObject implements ClientSessionListe
 	protected void setSession(ClientSession session) {
 		DataManager dataMgr = AppContext.getDataManager();
 		dataMgr.markForUpdate(this);
-
-		currentSessionRef = dataMgr.createReference(session);
+		if(session == null){
+			currentSessionRef = null;
+		}
+		else {
+			currentSessionRef = dataMgr.createReference(session);
+		}
 
 		logger.log(Level.INFO, "Set session for {0} to {1}", new Object[] { this, session });
 	}
 
+    /**
+     * Returns the room this player is currently in, or {@code null} if
+     * this player is not in a room.
+     * <p>
+     * @return the room this player is currently in, or {@code null}
+     */
+    protected StrategoRoom getRoom() {
+        if (currentRoomRef == null)
+            return null;
+
+        return currentRoomRef.get();
+    }
+	
 	/**
 	 * Sets the room this player is currently in. If the room given is null,
 	 * marks the player as not in any room.
@@ -98,7 +119,7 @@ public class StrategoPlayer extends StrategoObject implements ClientSessionListe
 	 * @param room
 	 *            the room this player should be in, or {@code null}
 	 */
-	protected void setRoom(StrategoGame room) {
+	protected void setRoom(StrategoRoom room) {
 		DataManager dataManager = AppContext.getDataManager();
 		dataManager.markForUpdate(this);
 
@@ -116,7 +137,7 @@ public class StrategoPlayer extends StrategoObject implements ClientSessionListe
 	 * @param room
 	 *            the room for this player to enter
 	 */
-	public void enter(StrategoGame room) {
+	public void enter(StrategoRoom room) {
 		logger.log(Level.INFO, "{0} enters {1}", new Object[] { this, room });
 		room.addPlayer(this);
 		setRoom(room);
@@ -124,25 +145,35 @@ public class StrategoPlayer extends StrategoObject implements ClientSessionListe
 
 	@Override
 	public void disconnected(boolean arg0) {
-		setSession(null);
-		logger.log(Level.INFO, "Disconnected: {0}", this);
-		// getRoom().removePlayer(this);
-		setRoom(null);
+        setSession(null);
+        logger.log(Level.INFO, "Disconnected: {0}", this);
+        getRoom().removePlayer(this);
+        setRoom(null);
 	}
 
 	@Override
 	public void receivedMessage(ByteBuffer message) {
-        String command = decodeString(message);
+        String command = CDC.decodeString(message);
 
         logger.log(Level.INFO,
             "{0} received command: {1}",
             new Object[] { this, command }
         );
 
-        if (command.equalsIgnoreCase("look")) {
-//            String reply = getRoom().look(this);
-//            getSession().send(encodeString(reply));
-        } else {
+        if (Command.GET_PLAYERS.matchesCommand(command)) {
+        	String reply = getRoom().describesPlayers(this);
+            getSession().send(CDC.encodeString(reply));
+        }
+        else if(Command.CHALLENGE.matchesCommand(command)){
+        	String challengedPlayerName = getCommandContents(command);
+        	challengeAnotherPlayer(challengedPlayerName);
+        }
+        else if(Command.CHALLENGE_ACCEPTED.matchesCommand(command)){
+        	String challengedPlayerName = getCommandContents(command);
+        	StrategoPlayer red = getRoom().getPlayer(challengedPlayerName); 
+        	getRoom().startGame(red, this);
+        }
+        else {
             logger.log(Level.WARNING,
                 "{0} unknown command: {1}",
                 new Object[] { this, command }
@@ -152,35 +183,21 @@ public class StrategoPlayer extends StrategoObject implements ClientSessionListe
         }
     }
 
-	/**
-	 * Encodes a {@code String} into a {@link ByteBuffer}.
-	 * 
-	 * @param s
-	 *            the string to encode
-	 * @return the {@code ByteBuffer} which encodes the given string
-	 */
-	protected static ByteBuffer encodeString(String s) {
-		try {
-			return ByteBuffer.wrap(s.getBytes(MESSAGE_CHARSET));
-		} catch (UnsupportedEncodingException e) {
-			throw new Error("Required character set " + MESSAGE_CHARSET + " not found", e);
+	private String getCommandContents(String command) {
+		int ind = command.indexOf(':');
+		return command.substring(ind+1);
+	}
+
+	private void challengeAnotherPlayer(String challengedPlayerName) {
+		logger.info("Challenging "+challengedPlayerName);
+		StrategoPlayer challengedPlayer = getRoom().getPlayer(challengedPlayerName);
+		if(challengedPlayer != null){
+			challengedPlayer.getSession().send(CDC.encodeString(Command.CHALLENGED_BY+":"+getName()));
+		}
+		else {
+			getSession().send(CDC.encodeString(Command.ERR+": Player '"+challengedPlayerName+"' not connected anymore."));
 		}
 	}
 
-	/**
-	 * Decodes a message into a {@code String}.
-	 * 
-	 * @param message
-	 *            the message to decode
-	 * @return the decoded string
-	 */
-	protected static String decodeString(ByteBuffer message) {
-		try {
-			byte[] bytes = new byte[message.remaining()];
-			message.get(bytes);
-			return new String(bytes, MESSAGE_CHARSET);
-		} catch (UnsupportedEncodingException e) {
-			throw new Error("Required character set " + MESSAGE_CHARSET + " not found", e);
-		}
-	}
+
 }
