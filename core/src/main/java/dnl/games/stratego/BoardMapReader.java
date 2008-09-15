@@ -6,13 +6,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
 public class BoardMapReader {
 
-	public static Board readSystemResource(String resourceName) throws IOException {
-		InputStream is = ClassLoader.getSystemResourceAsStream(resourceName);
+	public static Board readResource(String resourceName) throws IOException {
+		InputStream is = BoardMapReader.class.getResourceAsStream(resourceName);
 		if(is == null){
 			throw new IllegalStateException("Did not find a system resource named: "+resourceName);
 		}
@@ -23,14 +24,43 @@ public class BoardMapReader {
 		return readStream(new FileInputStream(f));
 	}
 	
+	/**
+	 * 
+	 * @param is
+	 * @return
+	 * @throws IOException
+	 */
 	public static Board readStream(InputStream is) throws IOException {
 		StringWriter stringWriter = new StringWriter();
 		IOUtils.copy(is, stringWriter);
 		String s = stringWriter.getBuffer().toString();
-		Board board = BoardMapReader.read(s);
+		Board board = read(s);
 		return board;
 	}
 
+	/**
+	 * 
+	 * @param board
+	 * @param f
+	 * @throws IOException
+	 */
+	public static void save(Board board, File f) throws IOException{
+		StringBuilder sb = new StringBuilder();
+		StrategoPiece[][] squares = board.getSquares();
+		for (int i = 0; i < squares.length; i++) {
+			for (int j = 0; j < squares[i].length; j++) {
+				if(squares[i][j] == null){
+					sb.append(" ");
+				}
+				else {
+					sb.append(squares[i][j].getAbbreviatedName());
+				}
+			}
+			sb.append("\n");
+		}
+		FileUtils.writeStringToFile(f, sb.toString());
+	}
+	
 	public static Board read(String positions) {
 		String errMessage = "Positions string must contain 10 lines of length 10.";
 		String[] rows = StringUtils.split(positions, "\n");

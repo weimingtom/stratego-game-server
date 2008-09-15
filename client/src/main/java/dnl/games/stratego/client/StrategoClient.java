@@ -1,14 +1,21 @@
 package dnl.games.stratego.client;
 
+import java.io.IOException;
 import java.net.PasswordAuthentication;
 import java.nio.ByteBuffer;
 import java.util.Properties;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.apache.commons.lang.StringUtils;
 
 import com.sun.sgs.client.ClientChannel;
 import com.sun.sgs.client.ClientChannelListener;
 import com.sun.sgs.client.simple.SimpleClient;
 import com.sun.sgs.client.simple.SimpleClientListener;
+
+import dnl.games.stratego.PlayerType;
+import dnl.games.stratego.comm.Command;
 
 public class StrategoClient implements SimpleClientListener {
 
@@ -32,17 +39,18 @@ public class StrategoClient implements SimpleClientListener {
 	protected final SimpleClient simpleClient = new SimpleClient(this);
 
 	private String playerName;
-	
-	private ClientStatusListener clientStatusListener;
-	
-	public void setClientStatusListener(ClientStatusListener clientStatusListener) {
-		this.clientStatusListener = clientStatusListener;
+
+	private StrategoClientListener clientListener;
+
+	// private
+	public void setClientListener(StrategoClientListener clientListener) {
+		this.clientListener = clientListener;
 	}
+
+	private String message;
 
 	public void login(String host, String port, String playerName) {
 		this.playerName = playerName;
-		//String host = System.getProperty(HOST_PROPERTY, DEFAULT_HOST);
-		//String port = System.getProperty(PORT_PROPERTY, DEFAULT_PORT);
 
 		try {
 			Properties connectProps = new Properties();
@@ -56,6 +64,48 @@ public class StrategoClient implements SimpleClientListener {
 
 	}
 
+	public void challenge(String player) {
+		sendCommand(Command.CHALLENGE, player);
+	}
+
+	public void doneOrderingPieces(String game) {
+		sendCommand(Command.ORDERING_DONE, game);
+	}
+
+	public void acceptChallenge(String player) {
+		sendCommand(Command.CHALLENGE_ACCEPTED, player);
+	}
+
+	private void sendCommand(Command command, String content) {
+		ByteBuffer bb = CDC.encodeString(command.name() + ":" + content);
+		try {
+			simpleClient.send(bb);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public String[] getPlayersList() {
+		message = null;
+		sendCommand(Command.GET_PLAYERS, "");
+		waitForMessage();
+		if (message == null) {
+			// too bad
+			logger.log(Level.WARNING, "Did not receive data from server in a timely manner.");
+		}
+		return StringUtils.split(message, ";,");
+	}
+
+	private void waitForMessage() {
+		for (int i = 0; message == null && i < 5; i++) {
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
 	/**
 	 * Displays the given string in this client's status bar.
 	 * 
@@ -63,9 +113,9 @@ public class StrategoClient implements SimpleClientListener {
 	 *            the status message to set
 	 */
 	protected void setStatus(ClientStatus status, String statusMessage) {
-		if(clientStatusListener == null)
+		if (clientListener == null)
 			return;
-		clientStatusListener.statusChanged(status, statusMessage);
+		clientListener.statusChanged(status, statusMessage);
 	}
 
 	/**
@@ -74,7 +124,7 @@ public class StrategoClient implements SimpleClientListener {
 	 * Disables input and updates the status message on disconnect.
 	 */
 	public void disconnected(boolean graceful, String reason) {
-		 setStatus(ClientStatus.DISCONNECTED, "Disconnected: " + reason);
+		setStatus(ClientStatus.DISCONNECTED, "Disconnected: " + reason);
 	}
 
 	@Override
@@ -91,39 +141,55 @@ public class StrategoClient implements SimpleClientListener {
 
 	@Override
 	public void loggedIn() {
-		String msg = "Login succeeded for player: "+playerName;
+		String msg = "Login succeeded for player: " + playerName;
 		logger.info(msg);
 		setStatus(ClientStatus.LOGGED_IN, msg);
 	}
 
 	@Override
 	public void loginFailed(String arg0) {
-		String msg = "Login failed for player: "+playerName;
+		String msg = "Login failed for player: " + playerName;
 		logger.info(msg);
 		setStatus(ClientStatus.LOGIN_FAILED, msg);
 	}
 
 	@Override
 	public ClientChannelListener joinedChannel(ClientChannel arg0) {
-		// TODO Auto-generated method stub
+		System.err.println("joinedChannel!");
 		return null;
 	}
 
 	@Override
-	public void receivedMessage(ByteBuffer arg0) {
-		// TODO Auto-generated method stub
+	public void receivedMessage(ByteBuffer bb) {
+		message = CDC.decodeString(bb);
+		logger.info("receivedMessage(): " + message);
+		if (Command.CHALLENGED_BY.matchesCommand(message)) {
+			clientListener.challengedBy(extractCommandContent(message));
+		}
+		if (Command.STARTING_GAME.matchesCommand(message)) {
+			String gameName = extractCommandContent(message);
+			PlayerType playerType = PlayerType.BLUE;
+			if(gameName.endsWith(playerName)){
+				playerType = PlayerType.RED;
+			}
+			clientListener.startGame(gameName, playerType);
+		}
+	}
 
+	private String extractCommandContent(String command) {
+		int ind = command.indexOf(':');
+		return command.substring(ind + 1);
 	}
 
 	@Override
 	public void reconnected() {
-		// TODO Auto-generated method stub
+		logger.info("reconnected()");
 
 	}
 
 	@Override
 	public void reconnecting() {
-		// TODO Auto-generated method stub
+		logger.info("reconnecting()");
 
 	}
 }
