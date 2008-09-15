@@ -14,13 +14,13 @@ import dnl.games.stratego.StrategoPiece;
 class PiecesLayer extends PiecesGrid {
 
 	private Image image;
-	
+
 	public PiecesLayer(ImageLoader imageLoader) {
 		super(new Dimension(60, 60), 10, 10);
 		this.setOpaque(false);
 		image = imageLoader.getBoardImage();
 	}
-	
+
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		Graphics2D g2 = (Graphics2D) g;
@@ -33,8 +33,7 @@ class PiecesLayer extends PiecesGrid {
 			for (int j = 0; j < 10; j++) {
 				StrategoPiece piece = board.getPieceAt(i, j);
 				if (piece != null) {
-					//StrategoPieceUI pieceUI = 
-						addPiece(i, j, piece);
+					addPiece(i, j, piece);
 				}
 			}
 		}

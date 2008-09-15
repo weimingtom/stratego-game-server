@@ -111,6 +111,10 @@ public class PiecesGrid extends JPanel {
 		}
 	}
 	
+	public StrategoPieceUI getPieceAt(Location location){
+		return gridPieces.get(location);
+	}
+	
 	public StrategoPieceUI getPieceAt(Point p){
 		Location location = getMatchingLocation(p);
 		return gridPieces.get(location);
@@ -132,13 +136,32 @@ public class PiecesGrid extends JPanel {
 		pieceUI.setBounds((int)x, (int)y, (int) (cellWidth*.8), (int) (cellHeight*.8));
 	}
 	
-//	private void calculateCellDimensions(){
-//		int cellWidth = getWidth();
-//		cellWidth = cellWidth / numberOfColumns;
-//		int cellHeight = getHeight();
-//		cellHeight = cellHeight / numberOfColumns;
-//		this.pieceSize = new Dimension(cellWidth, cellHeight);
-//	}
+	protected Location getFirstAvailableFreeLocation(){
+		for (int i = 0; i < numberOfRows; i++) {
+			for (int j = 0; j < numberOfColumns; j++) {
+				Location loc = new Location(i, j);
+				if(gridPieces.get(loc) == null){
+					return loc;
+				}
+			}
+		}
+		return null;
+	}
+	
+	protected void removePieceUI(StrategoPieceUI pieceUI){
+		gridPieces.remove(pieceUI.getSourceGridLocation());
+		this.remove(pieceUI);
+	}
+	
+	protected void addPieceUI(Location location, StrategoPieceUI pieceUI){
+		if(location == null){
+			throw new IllegalStateException("location cannot be null.");
+		}
+		pieceUI.setLocationOnBoard(location.getRow(), location.getColumn());
+		gridPieces.put(pieceUI.getLocationOnBoard(), pieceUI);
+		this.add(pieceUI);
+		setGraphicLocation(pieceUI);
+	}
 
 	protected void addPieceUI(Location location, StrategoPieceUI pieceUI){
 		pieceUI.setLocationOnBoard(location.getRow(), location.getColumn());
@@ -148,8 +171,9 @@ public class PiecesGrid extends JPanel {
 	}
 
 	protected StrategoPieceUI addPiece(int row, int column, StrategoPiece piece){
-		StrategoPieceUI pieceUI = new StrategoPieceUI(piece);
-		addPieceUI(new Location(row, column), pieceUI);
+		Location initialLocation = new Location(row, column);
+		StrategoPieceUI pieceUI = new StrategoPieceUI(this, initialLocation, piece);
+		addPieceUI(initialLocation, pieceUI);
 		return pieceUI;
 	}
 
