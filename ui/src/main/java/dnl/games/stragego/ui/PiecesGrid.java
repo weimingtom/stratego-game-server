@@ -163,13 +163,6 @@ public class PiecesGrid extends JPanel {
 		setGraphicLocation(pieceUI);
 	}
 
-	protected void addPieceUI(Location location, StrategoPieceUI pieceUI){
-		pieceUI.setLocationOnBoard(location.getRow(), location.getColumn());
-		gridPieces.put(pieceUI.getLocationOnBoard(), pieceUI);
-		this.add(pieceUI);
-		setGraphicLocation(pieceUI);
-	}
-
 	protected StrategoPieceUI addPiece(int row, int column, StrategoPiece piece){
 		Location initialLocation = new Location(row, column);
 		StrategoPieceUI pieceUI = new StrategoPieceUI(this, initialLocation, piece);
