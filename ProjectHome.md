@@ -1,0 +1,1 @@
+A DarkStar based application that enables players to login and play stratego against each other.
